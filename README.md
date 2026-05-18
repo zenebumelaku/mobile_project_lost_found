@@ -1,71 +1,117 @@
-# Campus Lost & Found
+# Campus Lost & Found — Flutter App
 
-**Name:** Zenebu Melaku | **ID:** UGR/6058/16 | **Section:** 2
-**Course:** Mobile Application Development 2026
+Student Name: Zenebu Melaku
+Student ID: UGR/6058/16
+Section: 2
 
-A Flutter app to report, browse, update, and delete lost & found items using a live public REST API.
+## Overview
+
+A Flutter mobile application that allows campus students to report, browse, update, and delete lost and found items. The app performs full **CRUD (Create, Read, Update, Delete)** operations against a live public REST API hosted on [mockapi.io](https://mockapi.io).
 
 ---
 
 ## API
-**Base URL:** `https://6a083b81fa9b27c848fac459.mockapi.io/items`
 
-| Operation | Method | Endpoint |
-|---|---|---|
-| Read all | `GET` | `/items` |
-| Create | `POST` | `/items` |
-| Update | `PUT` | `/items/:id` |
-| Delete | `DELETE` | `/items/:id` |
+- **Base URL:** `https://6a083b81fa9b27c848fac459.mockapi.io/items`
+- **Type:** Public REST API (mockapi.io)
+
+| Operation      | Method   | Endpoint     |
+| -------------- | -------- | ------------ |
+| Read all items | `GET`    | `/items`     |
+| Create item    | `POST`   | `/items`     |
+| Update item    | `PUT`    | `/items/:id` |
+| Delete item    | `DELETE` | `/items/:id` |
 
 ---
 
 ## Project Structure
+
 ```
 lib/
-├── main.dart
-├── models/item_model.dart
-├── providers/item_provider.dart
+├── main.dart                  # App entry point, Provider setup
+├── models/
+│   └── item_model.dart        # LostFoundItem data model
+├── providers/
+│   └── item_provider.dart     # State management (ChangeNotifier)
 ├── screens/
-│   ├── home_screen.dart
-│   └── add_edit_item_screen.dart
-├── services/api_service.dart
+│   ├── home_screen.dart       # Main screen — list, search, filter
+│   └── add_edit_item_screen.dart  # Create / Update form screen
+├── services/
+│   └── api_service.dart       # HTTP CRUD operations
 └── widgets/
-    ├── item_card.dart
-    └── status_badge.dart
+    ├── item_card.dart         # Individual item card widget
+    └── status_badge.dart      # Reusable badge widget
 ```
 
 ---
 
-## Requirements
+## State Management
 
-| Requirement | Implementation |
-|---|---|
-| Flutter app performing CRUD operations | Create, Read, Update, Delete via `mockapi.io` |
-| Publicly available API | `https://6a083b81fa9b27c848fac459.mockapi.io/items` |
-| Provider state management | `ItemProvider` extends `ChangeNotifier`, wrapped in `MultiProvider` |
-| `http` package for network requests | All API calls use `package:http/http.dart` in `api_service.dart` |
-| Clean & maintainable project structure | Separated into `models/`, `providers/`, `screens/`, `services/`, `widgets/` |
-| Error handling & loading states | Try/catch on every call, error UI with retry, `isLoading` flag with spinner |
+The app uses the **Provider** package for state management:
+
+- `ItemProvider` extends `ChangeNotifier`
+- Manages the list of items, loading state, error messages, search query, and filter selection
+- All UI widgets listen to `ItemProvider` via `context.watch<ItemProvider>()`
+- Mutations (add, edit, delete) call `notifyListeners()` to rebuild the UI
+
+---
+
+## Features
+
+- **View** all lost & found items fetched from the live API
+- **Search** items by title or location in real time
+- **Filter** items by type (Lost / Found) or status (Active / Claimed)
+- **Report** a new lost or found item via a form
+- **Edit** any existing item
+- **Delete** any item with a confirmation dialog
+- **Error handling** with retry button when network fails
+- **Loading indicator** while data is being fetched
 
 ---
 
 ## Screenshots
 
-| Home | Add | Edit | Delete |
-|---|---|---|---|
-| ![](screenshots/home.png) | ![](screenshots/add.png) | ![](screenshots/edit.png) | ![](screenshots/delete.png) |
+### Home Screen
+
+![Home Screen](screenshots/home.png)
+
+### Add Item Screen
+
+![Add Item](screenshots/add.png)
+
+### Edit Item Screen
+
+![Edit Item](screenshots/edit.png)
+
+### Delete Confirmation
+
+![Delete](screenshots/delete.png)
 
 ---
 
-## Run
+## How to Run
 
-```bash
-flutter pub get
-flutter run
-```
+1. **Clone the repository**
 
-## Dependencies
-```yaml
-provider: ^6.1.2
-http: ^1.2.1
-```
+   ```bash
+   git clone <your-repo-url>
+   cd lost_found
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   flutter pub get
+   ```
+
+3. **Run the app**
+   ```bash
+   flutter run
+   ```
+
+## Tech Stack
+
+- **Framework:** Flutter (Dart)
+- **State Management:** Provider
+- **Networking:** http package
+- **API:** mockapi.io (public REST API)
