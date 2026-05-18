@@ -28,249 +28,220 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ItemProvider>();
-    final cs = Theme.of(context).colorScheme;
+
+    // Exact colors from the photo
+    const headerTop = Color(0xFF00756A);
+    const headerBottom = Color(0xFF269088);
+    const bgColor = Color(0xFFF2F6F5);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FB),
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 140,
-            pinned: true,
-            backgroundColor: cs.primary,
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
-              title: const Text(
-                'Campus Lost & Found',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
+      backgroundColor: bgColor,
+      body: Column(
+        children: [
+          // ── Header ──────────────────────────────────────────────
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [headerTop, headerBottom],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [cs.primary, cs.secondary],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: const Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 40, right: 20),
-                    child: Icon(Icons.search_rounded, size: 80, color: Colors.white24),
-                  ),
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title
+                    const Text(
+                      'Campus Lost & Found',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Find or report lost items on campus',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Filter chips row
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: ['All', 'Lost', 'Found', 'Active', 'Claimed']
+                            .map((f) {
+                          final selected = provider.selectedFilter == f;
+                          return GestureDetector(
+                            onTap: () => provider.setFilter(f),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: selected
+                                    ? Colors.white
+                                    : const Color(0xFF26908A),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: selected
+                                      ? Colors.transparent
+                                      : Colors.white38,
+                                ),
+                              ),
+                              child: Text(
+                                f,
+                                style: TextStyle(
+                                  color: selected
+                                      ? headerTop
+                                      : Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Search bar
+                    Container(
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: TextField(
+                        onChanged: provider.setSearchQuery,
+                        style: const TextStyle(fontSize: 14),
+                        decoration: InputDecoration(
+                          hintText: 'Search items...',
+                          hintStyle: TextStyle(
+                              color: Colors.grey.shade400, fontSize: 14),
+                          prefixIcon: Icon(Icons.search,
+                              color: Colors.grey.shade400, size: 20),
+                          border: InputBorder.none,
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 13),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
 
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Column(
-                children: [
-                  // Search bar
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.07),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+          // ── Body ────────────────────────────────────────────────
+          Expanded(
+            child: provider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : provider.errorMessage.isNotEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.wifi_off_rounded,
+                                size: 56, color: Colors.grey.shade400),
+                            const SizedBox(height: 12),
+                            Text(provider.errorMessage,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Colors.grey.shade600)),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: provider.loadItems,
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Retry'),
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: headerTop,
+                                  foregroundColor: Colors.white),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: TextField(
-                      onChanged: provider.setSearchQuery,
-                      decoration: InputDecoration(
-                        hintText: 'Search by title or location...',
-                        hintStyle: TextStyle(color: Colors.grey.shade400),
-                        prefixIcon: Icon(Icons.search, color: cs.primary),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Filter chips
-                  Row(
-                    children: [
-                      _buildStat(provider.allItems.length.toString(), 'Total', Colors.deepPurple),
-                      const SizedBox(width: 10),
-                      _buildStat(
-                        provider.allItems.where((i) => i.type == 'Lost').length.toString(),
-                        'Lost',
-                        Colors.red,
-                      ),
-                      const SizedBox(width: 10),
-                      _buildStat(
-                        provider.allItems.where((i) => i.type == 'Found').length.toString(),
-                        'Found',
-                        Colors.green,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Filter row
-                  Row(
-                    children: ['All', 'Lost', 'Found', 'Active', 'Claimed'].map((f) {
-                      final selected = provider.selectedFilter == f;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GestureDetector(
-                          onTap: () => provider.setFilter(f),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: selected ? cs.primary : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.06),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
+                      )
+                    : provider.items.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.inbox_rounded,
+                                    size: 64,
+                                    color: Colors.grey.shade300),
+                                const SizedBox(height: 10),
+                                Text('No items found',
+                                    style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.grey.shade500)),
                               ],
                             ),
-                            child: Text(
-                              f,
-                              style: TextStyle(
-                                color: selected ? Colors.white : Colors.grey.shade700,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(
+                                12, 14, 12, 90),
+                            itemCount: provider.items.length,
+                            itemBuilder: (context, index) {
+                              final item = provider.items[index];
+                              return ItemCard(
+                                item: item,
+                                onEdit: () => _openForm(item: item),
+                                onDelete: () async {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (_) => AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16)),
+                                      title: const Text('Delete Item'),
+                                      content: const Text(
+                                          'Are you sure you want to delete this item?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(
+                                              context, false),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.red),
+                                          onPressed: () => Navigator.pop(
+                                              context, true),
+                                          child: const Text('Delete',
+                                              style: TextStyle(
+                                                  color: Colors.white)),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirm == true && item.id != null) {
+                                    await provider.removeItem(item.id!);
+                                  }
+                                },
+                              );
+                            },
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
-            ),
           ),
-
-          if (provider.isLoading)
-            const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (provider.errorMessage.isNotEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.wifi_off_rounded, size: 60, color: Colors.grey.shade400),
-                    const SizedBox(height: 12),
-                    Text(provider.errorMessage,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey.shade600)),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: provider.loadItems,
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else if (provider.items.isEmpty)
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.inbox_rounded, size: 70, color: Colors.grey.shade300),
-                    const SizedBox(height: 12),
-                    Text('No items found',
-                        style: TextStyle(fontSize: 16, color: Colors.grey.shade500)),
-                  ],
-                ),
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final item = provider.items[index];
-                    return ItemCard(
-                      item: item,
-                      onEdit: () => _openForm(item: item),
-                      onDelete: () async {
-                        final confirm = await showDialog<bool>(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16)),
-                            title: const Text('Delete Item'),
-                            content:
-                                const Text('Are you sure you want to delete this item?'),
-                            actions: [
-                              TextButton(
-                                  onPressed: () => Navigator.pop(context, false),
-                                  child: const Text('Cancel')),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red),
-                                onPressed: () => Navigator.pop(context, true),
-                                child: const Text('Delete',
-                                    style: TextStyle(color: Colors.white)),
-                              ),
-                            ],
-                          ),
-                        );
-                        if (confirm == true && item.id != null) {
-                          await provider.removeItem(item.id!);
-                        }
-                      },
-                    );
-                  },
-                  childCount: provider.items.length,
-                ),
-              ),
-            ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openForm(),
-        icon: const Icon(Icons.add),
-        label: const Text('Report Item'),
-        backgroundColor: cs.primary,
+        backgroundColor: headerTop,
         foregroundColor: Colors.white,
-      ),
-    );
-  }
-
-  Widget _buildStat(String count, String label, Color color) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: color.withOpacity(0.2)),
-        ),
-        child: Column(
-          children: [
-            Text(count,
-                style: TextStyle(
-                    fontSize: 22, fontWeight: FontWeight.bold, color: color)),
-            Text(label,
-                style: TextStyle(fontSize: 12, color: color.withOpacity(0.8))),
-          ],
-        ),
+        icon: const Icon(Icons.add),
+        label: const Text('Report Item',
+            style: TextStyle(fontWeight: FontWeight.w600)),
       ),
     );
   }

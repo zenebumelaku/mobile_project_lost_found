@@ -17,128 +17,121 @@ class ItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLost = item.type == 'Lost';
     final isActive = item.status == 'Active';
-    final typeColor = isLost ? Colors.red : Colors.green;
-    final statusColor = isActive ? Colors.blue : Colors.grey;
+    final typeColor = isLost ? const Color(0xFFE53935) : const Color(0xFF51A755);
+    final statusColor = isActive ? const Color(0xFF00756A) : Colors.grey;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.07),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Column(
-        children: [
-          // Top color bar
-          Container(
-            height: 5,
-            decoration: BoxDecoration(
-              color: typeColor,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(18)),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Colored left border
+            Container(
+              width: 6,
+              decoration: BoxDecoration(
+                color: typeColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  bottomLeft: Radius.circular(12),
+                ),
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+            // Content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Icon avatar
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        color: typeColor.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        isLost
-                            ? Icons.search_off_rounded
-                            : Icons.check_circle_outline_rounded,
-                        color: typeColor,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
+                    // Title + badges row
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
                             item.title,
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 15,
                               fontWeight: FontWeight.bold,
+                              color: Color(0xFF1A1A2E),
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              _badge(item.type, typeColor),
-                              const SizedBox(width: 6),
-                              _badge(item.status, statusColor),
-                            ],
-                          ),
-                        ],
+                        ),
+                        const SizedBox(width: 6),
+                        _badge(item.type, typeColor),
+                        const SizedBox(width: 4),
+                        _badge(item.status, statusColor),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    // Description
+                    Text(
+                      item.description,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        height: 1.4,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    // Location
+                    _infoRow(Icons.location_on_rounded, item.location,
+                        const Color(0xFF00756A)),
+                    const SizedBox(height: 3),
+                    // Contact
+                    _infoRow(Icons.phone_rounded, item.contactInfo,
+                        const Color(0xFF00756A)),
+                    const Divider(height: 14, thickness: 0.7),
+                    // Action buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        _actionBtn(
+                          icon: Icons.edit_rounded,
+                          label: 'Edit',
+                          color: const Color(0xFF00756A),
+                          onTap: onEdit,
+                        ),
+                        const SizedBox(width: 8),
+                        _actionBtn(
+                          icon: Icons.delete_rounded,
+                          label: 'Delete',
+                          color: Colors.red,
+                          onTap: onDelete,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  item.description,
-                  style: TextStyle(
-                      fontSize: 13.5, color: Colors.grey.shade700, height: 1.4),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 10),
-                _infoRow(Icons.location_on_rounded, item.location, Colors.deepPurple),
-                const SizedBox(height: 4),
-                _infoRow(Icons.contact_phone_rounded, item.contactInfo, Colors.teal),
-                const Divider(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    _actionBtn(
-                      icon: Icons.edit_rounded,
-                      label: 'Edit',
-                      color: Colors.deepPurple,
-                      onTap: onEdit,
-                    ),
-                    const SizedBox(width: 8),
-                    _actionBtn(
-                      icon: Icons.delete_rounded,
-                      label: 'Delete',
-                      color: Colors.red,
-                      onTap: onDelete,
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _badge(String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withOpacity(0.4), width: 1),
       ),
       child: Text(
         label,
@@ -151,12 +144,12 @@ class ItemCard extends StatelessWidget {
   Widget _infoRow(IconData icon, String text, Color color) {
     return Row(
       children: [
-        Icon(icon, size: 15, color: color),
-        const SizedBox(width: 6),
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 5),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -173,20 +166,20 @@ class ItemCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(10),
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(color: color.withOpacity(0.3)),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 15, color: color),
-            const SizedBox(width: 5),
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 4),
             Text(label,
                 style: TextStyle(
                     color: color,
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600)),
           ],
         ),
